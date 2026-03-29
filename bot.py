@@ -111,7 +111,7 @@ async def stats_handler(client: Client, message: Message):
 # ─────────────────────────────────────────────
 # Handle Drive links
 # ─────────────────────────────────────────────
-@app.on_message(filters.text & filters.private)
+@app.on_message(filters.text & filters.private & ~filters.command(["start", "cancel", "status", "stats"]))
 async def link_handler(client: Client, message: Message):
     user_id = message.from_user.id
     text = message.text.strip()
