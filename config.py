@@ -21,9 +21,10 @@ class Config:
     MAX_JOBS_PER_HOUR: int = int(os.getenv("MAX_JOBS_PER_HOUR", "3"))
 
     # Playwright settings
-    BROWSER_TIMEOUT: int = int(os.getenv("BROWSER_TIMEOUT", "120000"))  # ms — 2 minutes
-    SCROLL_DELAY: float = float(os.getenv("SCROLL_DELAY", "1.5"))        # seconds between scrolls
-    MAX_PAGES: int = int(os.getenv("MAX_PAGES", "500"))                  # safety cap
+    BROWSER_TIMEOUT: int = int(os.getenv("BROWSER_TIMEOUT", "30000"))    # ms — only for initial page load
+    SCROLL_DELAY: float = float(os.getenv("SCROLL_DELAY", "1.5"))         # seconds between scrolls
+    MAX_PAGES: int = int(os.getenv("MAX_PAGES", "500"))                   # safety cap
+    SCROLL_STALL_LIMIT: int = int(os.getenv("SCROLL_STALL_LIMIT", "8"))  # scrolls with no new page before stopping
 
     # Temp directory for PDFs
     TEMP_DIR: str = os.getenv("TEMP_DIR", "/tmp/drive_pdf_bot")
