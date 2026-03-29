@@ -1,0 +1,36 @@
+# render.yaml — Render deployment configuration
+services:
+  - type: web
+    name: drive-pdf-bot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter          # $7/month — recommended for Playwright
+    # plan: free           # Free tier — may sleep after 15min inactivity
+
+    envVars:
+      - key: API_ID
+        sync: false        # Set manually in Render dashboard
+      - key: API_HASH
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: MAX_JOBS_PER_HOUR
+        value: "3"
+      - key: BROWSER_TIMEOUT
+        value: "60000"
+      - key: SCROLL_DELAY
+        value: "1.5"
+      - key: MAX_PAGES
+        value: "500"
+      - key: TEMP_DIR
+        value: "/tmp/drive_pdf_bot"
+      - key: DB_PATH
+        value: "/tmp/bot_data.db"
+
+    # Persist SQLite DB across deploys (optional, Render disk)
+    # disk:
+    #   name: bot-data
+    #   mountPath: /data
+    #   sizeGB: 1
