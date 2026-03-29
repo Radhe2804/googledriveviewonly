@@ -2,6 +2,6 @@ pyrogram==2.0.106
 TgCrypto
 playwright
 Pillow
-img2pdf
 python-dotenv
 pypdf
+reportlab
