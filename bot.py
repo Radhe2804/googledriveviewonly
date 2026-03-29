@@ -144,8 +144,8 @@ async def link_handler(client: Client, message: Message):
         "This may take a few seconds."
     )
 
-    db.log_job_start(user_id, text)
-    job_id = queue.add_job(user_id)
+    job_id = db.log_job_start(user_id, text)   # Fix #1 — single unified job_id from DB
+    queue.add_job(user_id, job_id)             # Fix #8 — pass same ID into queue
 
     try:
         scraper = DriveScraper(
@@ -185,8 +185,9 @@ async def link_handler(client: Client, message: Message):
                 f"⏱️ Time taken: `{elapsed}s`"
             ),
             progress=upload_progress,
-            progress_args=(status_msg, start_time)
+            progress_args=(status_msg, start_time, user_id)
         )
+        _last_upload_percent.pop(user_id, None)  # cleanup tracking dict
 
         await status_msg.delete()
         db.log_job_success(job_id, page_count, file_size_mb)
@@ -198,6 +199,8 @@ async def link_handler(client: Client, message: Message):
     except asyncio.CancelledError:
         await status_msg.edit_text("❌ Job cancelled by user.")
         db.log_job_failed(job_id, "Cancelled by user")
+        # Fix #12 — clean up any partial temp file
+        scraper.cleanup()
 
     except Exception as e:
         logger.error(f"Job failed for user {user_id}: {e}")
@@ -215,23 +218,31 @@ async def link_handler(client: Client, message: Message):
 # ─────────────────────────────────────────────
 # Upload progress callback
 # ─────────────────────────────────────────────
-async def upload_progress(current, total, status_msg, start_time):
-    percent = round((current / total) * 100, 1)
+# Fix #7 — track last sent percent to avoid Telegram flood
+_last_upload_percent: dict = {}
+
+async def upload_progress(current, total, status_msg, start_time, user_id):
+    percent = int((current / total) * 100)
     uploaded_mb = round(current / (1024 * 1024), 1)
     total_mb = round(total / (1024 * 1024), 1)
     elapsed = round(time.time() - start_time, 1)
 
-    # Update every 10% to avoid flood
-    if percent % 10 < 1:
-        try:
-            await status_msg.edit_text(
-                f"📤 **Uploading PDF...**\n\n"
-                f"Progress: `{percent}%`\n"
-                f"Uploaded: `{uploaded_mb} MB / {total_mb} MB`\n"
-                f"⏱️ Elapsed: `{elapsed}s`"
-            )
-        except Exception:
-            pass
+    # Only update when percent crosses a new 10% boundary
+    last = _last_upload_percent.get(user_id, -1)
+    milestone = (percent // 10) * 10
+    if milestone <= last:
+        return
+    _last_upload_percent[user_id] = milestone
+
+    try:
+        await status_msg.edit_text(
+            f"📤 **Uploading PDF...**\n\n"
+            f"Progress: `{milestone}%`\n"
+            f"Uploaded: `{uploaded_mb} MB / {total_mb} MB`\n"
+            f"⏱️ Elapsed: `{elapsed}s`"
+        )
+    except Exception:
+        pass
 
 
 # ─────────────────────────────────────────────
