@@ -11,9 +11,8 @@ class JobQueue:
         self._jobs: Dict[int, dict] = {}
         self._lock = threading.Lock()
 
-    def add_job(self, user_id: int) -> str:
-        import uuid
-        job_id = str(uuid.uuid4())
+    def add_job(self, user_id: int, job_id: str):
+        """Register an active job. job_id comes from DB for unified tracking."""
         with self._lock:
             self._jobs[user_id] = {
                 "job_id": job_id,
@@ -22,7 +21,6 @@ class JobQueue:
                 "total_pages": 0,
                 "cancelled": False
             }
-        return job_id
 
     def has_active_job(self, user_id: int) -> bool:
         with self._lock:
