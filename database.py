@@ -21,6 +21,12 @@ class Database:
         return conn
 
     def _init_db(self):
+        # Fix #13 — warn if DB is on /tmp (ephemeral on Render, resets on redeploy)
+        if self.db_path.startswith("/tmp"):
+            logger.warning(
+                "⚠️  DB is on /tmp — data will reset on Render redeploy! "
+                "Set DB_PATH to a Render Disk path (e.g. /data/bot.db) for persistence."
+            )
         with self._connect() as conn:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS jobs (
