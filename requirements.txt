@@ -4,3 +4,4 @@ playwright
 Pillow
 img2pdf
 python-dotenv
+pypdf
