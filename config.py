@@ -21,7 +21,7 @@ class Config:
     MAX_JOBS_PER_HOUR: int = int(os.getenv("MAX_JOBS_PER_HOUR", "3"))
 
     # Playwright settings
-    BROWSER_TIMEOUT: int = int(os.getenv("BROWSER_TIMEOUT", "60000"))   # ms
+    BROWSER_TIMEOUT: int = int(os.getenv("BROWSER_TIMEOUT", "120000"))  # ms — 2 minutes
     SCROLL_DELAY: float = float(os.getenv("SCROLL_DELAY", "1.5"))        # seconds between scrolls
     MAX_PAGES: int = int(os.getenv("MAX_PAGES", "500"))                  # safety cap
 
