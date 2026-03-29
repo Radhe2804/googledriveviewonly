@@ -70,9 +70,12 @@ class DriveScraper:
             page: Page = await context.new_page()
 
             try:
-                # Open the Drive link
-                await page.goto(self.url, timeout=Config.BROWSER_TIMEOUT, wait_until="networkidle")
-                await asyncio.sleep(2)
+                # Open the Drive link — use domcontentloaded to avoid networkidle timeout
+                await page.goto(self.url, timeout=Config.BROWSER_TIMEOUT, wait_until="domcontentloaded")
+                # Wait for redirect to settle
+                await asyncio.sleep(3)
+                # If redirected to a new URL, wait a bit more for content
+                await page.wait_for_load_state("domcontentloaded", timeout=Config.BROWSER_TIMEOUT)
 
                 # Update status
                 await self._update_status("🔍 Detecting page structure...")
