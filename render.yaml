@@ -1,11 +1,10 @@
 # render.yaml — Render deployment configuration
 services:
-  - type: web
+  - type: worker          # ← Background worker, no port needed
     name: drive-pdf-bot
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter          # $7/month — recommended for Playwright
-    # plan: free           # Free tier — may sleep after 15min inactivity
+    plan: starter
 
     envVars:
       - key: API_ID
